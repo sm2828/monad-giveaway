@@ -1,112 +1,115 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import Confetti from "react-confetti";
 
 export default function Home() {
+  // Game state
+  const [guess, setGuess] = useState("");
+  const [message, setMessage] = useState("");
+  const [attempts, setAttempts] = useState(100); // Example: 100 attempts
+  const [isDay, setIsDay] = useState(true); // Day mode initially
+  const [correctNumber, setCorrectNumber] = useState(generateRandomNumber()); // Random correct number
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  function generateRandomNumber() {
+    return Math.floor(Math.random() * 10) + 1; // Random number between 1 and 10
+  }
+
+  const handleGuess = () => {
+    const parsedGuess = parseInt(guess, 10);
+    if (isNaN(parsedGuess)) {
+      setMessage("Please enter a valid number.");
+      return;
+    }
+
+    if (parsedGuess < 1 || parsedGuess > 10) {
+      setMessage("Please enter a number between 1 and 10.");
+      return;
+    }
+
+    if (attempts > 0) {
+      if (parsedGuess === correctNumber) {
+        setMessage("Congratulations! You guessed the correct number!");
+        setShowConfetti(true); // Show confetti on correct guess
+        setAttempts(0); // End game
+      } else {
+        setMessage("Incorrect guess, try again!");
+        setAttempts(attempts - 1);
+      }
+    } else {
+      setMessage("No attempts left :(");
+    }
+  };
+
+  const handleRandomize = () => {
+    setGuess(generateRandomNumber().toString());
+  };
+
+  const handleModeChange = () => {
+    setIsDay(!isDay);
+    setCorrectNumber(generateRandomNumber()); // Randomize correct number when switching modes
+  };
+
+  const handleNewGame = () => {
+    setShowConfetti(false); // Hide confetti when starting a new game
+    setGuess("");
+    setMessage("");
+    setAttempts(100); // Reset attempts
+    setCorrectNumber(generateRandomNumber()); // Randomize correct number for new game
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+    <main className={`flex min-h-screen flex-col items-center justify-center p-24 ${isDay ? 'bg-[#f7ede8]' : 'bg-[#200052]'}`}>
+      {showConfetti && (
+        <Confetti
+          width={window.innerWidth}
+          height={window.innerHeight}
+          colors={['#836ef9', '#5feddf', '#a0055d', '#61004f']}
         />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
+      )}
+      
+      <div className="flex flex-col items-center">
+        <h1 className={`text-4xl font-bold mb-8 ${isDay ? 'text-[#200052]' : 'text-[#f7ede8]'}`}>
+          Giveaway Game
+        </h1>
+        
+        <div className="flex flex-col items-center mb-8">
+          <div className="flex items-center space-x-2">
+            <input
+              type="number"
+              value={guess}
+              onChange={(e) => setGuess(e.target.value)}
+              placeholder="#"
+              min="1"
+              max="10"
+              className={`p-2 border rounded ${isDay ? 'border-[#5feddf] text-[#200052]' : 'border-[#f7ede8] text-[#200052]'}`}
+            />
+            <button
+              onClick={handleRandomize}
+              className="px-4 py-2 bg-[#5feddf] text-white rounded hover:bg-[#836ef9]"
+            >
+              Randomize
+            </button>
+          </div>
+          <button
+            onClick={handleGuess}
+            className="mt-4 px-4 py-2 bg-[#836ef9] text-white rounded hover:bg-[#5feddf]"
+          >
+            Guess
+          </button>
+          <p className="mt-4 text-lg text-[#a0055d]">{message}</p>
+          <p className="mt-2 text-sm text-[#61004f]">
+            Attempts left: {attempts}
           </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
+        </div>
+        
+        <button
+          onClick={handleModeChange}
+          className="fixed bottom-8 right-8 px-4 py-2 bg-[#836ef9] text-white rounded hover:bg-[#5feddf]"
         >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+          {isDay ? 'Night' : 'Day'}
+        </button>
       </div>
     </main>
   );
