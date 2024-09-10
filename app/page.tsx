@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Confetti from "react-confetti";
+import { SpeedInsights } from "@vercel/speed-insights/next"
+
 
 export default function Home() {
   // Game state
@@ -11,6 +13,11 @@ export default function Home() {
   const [isDay, setIsDay] = useState(true); // Day mode initially
   const [correctNumber, setCorrectNumber] = useState(generateRandomNumber()); // Random correct number
   const [showConfetti, setShowConfetti] = useState(false);
+
+  useEffect(() => {
+    // Update the tab title when the component mounts
+    document.title = "Monad Giveaway";
+  }, []);
 
   function generateRandomNumber() {
     return Math.floor(Math.random() * 10) + 1; // Random number between 1 and 10
